@@ -1,5 +1,2 @@
-import { SpotifyPlayer } from '@/components/SpotifyPlayer';
-
-export default function MusicPage() {
-  return <main><SpotifyPlayer /></main>;
-}
+import RetroPlayer from '@/components/RetroPlayer';
+export default function P(){return <section><h1 className='title'>MUSIC ARCHIVE</h1><RetroPlayer/></section>}

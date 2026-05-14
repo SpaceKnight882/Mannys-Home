@@ -1,10 +1,48 @@
-const PASS='ecm-was here';
-function unlock(){const v=document.getElementById('pass').value;if(v===PASS){localStorage.setItem('unlocked','1');document.getElementById('lock').style.display='none';}else alert('Wrong passcode');}
-function initLock(){if(localStorage.getItem('unlocked')==='1')document.getElementById('lock').style.display='none';}
+const $ = (id) => document.getElementById(id);
+const store = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+const load = (k, d) => JSON.parse(localStorage.getItem(k) || JSON.stringify(d));
 
-const list=document.getElementById('songList'); const audio=document.getElementById('audio');
-function addSong(title,url){const songs=JSON.parse(localStorage.getItem('songs')||'[]');songs.push({title,url});localStorage.setItem('songs',JSON.stringify(songs));renderSongs();}
-function renderSongs(){if(!list) return; const songs=JSON.parse(localStorage.getItem('songs')||'[]');list.innerHTML='';songs.forEach((s,i)=>{const li=document.createElement('li');li.innerHTML=`<button onclick="playSong(${i})">▶</button> ${s.title}`;list.appendChild(li);});}
-function playSong(i){const songs=JSON.parse(localStorage.getItem('songs')||'[]');if(!songs[i])return;audio.src=songs[i].url;audio.play();}
-function wireUploader(){const f=document.getElementById('fileUpload');const u=document.getElementById('urlInput');const t=document.getElementById('titleInput');document.getElementById('addUrl').onclick=()=>{if(u.value)addSong(t.value||'URL Song',u.value)};f.onchange=(e)=>{[...e.target.files].forEach(file=>addSong(file.name,URL.createObjectURL(file)));};}
-initLock();renderSongs();if(document.getElementById('addUrl'))wireUploader();
+const songs = load('songs', []); let songIndex = 0;
+const audio = $('audio');
+function paintSong(){ $('nowPlaying').textContent = songs[songIndex] ? `Now playing: ${songs[songIndex].title}` : 'Now playing: Nothing yet'; }
+$('addSong').onclick = () => { const url=$('songUrl').value.trim(); const title=$('songTitle').value.trim()||'Untitled'; if(!url) return; songs.push({url,title}); store('songs',songs); songIndex=songs.length-1; audio.src=url; audio.play(); paintSong(); spawnPopup('New song added!'); };
+$('prevSong').onclick=()=>{ if(!songs.length) return; songIndex=(songIndex-1+songs.length)%songs.length; audio.src=songs[songIndex].url; audio.play(); paintSong();};
+$('nextSong').onclick=()=>{ if(!songs.length) return; songIndex=(songIndex+1)%songs.length; audio.src=songs[songIndex].url; audio.play(); paintSong();};
+$('playPause').onclick=()=> audio.paused?audio.play():audio.pause();
+
+const guests = load('guestbook', []);
+function renderGuests(){ $('guestList').innerHTML = guests.map(g=>`<li><b>${g.n}</b>: ${g.m}</li>`).join(''); }
+$('guestAdd').onclick=()=>{ const n=$('guestName').value.trim(),m=$('guestMsg').value.trim(); if(!n||!m)return; guests.push({n,m}); store('guestbook',guests); renderGuests();};
+
+let admin = false; $('unlockAdmin').onclick=()=>{admin=$('adminPass').value==='ecm-was here .'; if(admin){$('adminTools').classList.remove('hidden'); spawnPopup('Admin mode unlocked');} };
+const media = load('galleryMedia', []);
+function renderGallery(){ $('galleryGrid').innerHTML = media.map((m,i)=>`<div class='card'><p>${m.name}</p>${m.type.startsWith('image/')?`<img src='${m.data}'/>`:m.type==='application/pdf'?'<p>PDF saved in archive</p>':`<audio controls src='${m.data}'></audio>`}${admin?`<button data-del='${i}'>Delete</button>`:''}</div>`).join(''); [...document.querySelectorAll('[data-del]')].forEach(b=>b.onclick=()=>{media.splice(+b.dataset.del,1);store('galleryMedia',media);renderGallery();}); }
+$('saveFile').onclick=()=>{ const f=$('fileUpload').files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{const item={name:f.name,type:f.type||'application/octet-stream',data:r.result}; media.push(item); store('galleryMedia',media); if(f.type==='application/pdf') addPdf({title:f.name,data:r.result}); renderGallery();}; r.readAsDataURL(f); };
+
+const popTexts=['Welcome to my space site!','Check out the galaxy gallery!','You discovered a hidden star!'];
+function spawnPopup(t=popTexts[Math.floor(Math.random()*popTexts.length)]){ const d=document.createElement('div'); d.className='popup'; d.innerHTML=`<div data-drag='handle'>${t} <button>x</button></div>`; document.body.appendChild(d); d.style.top=Math.random()*300+100+'px'; d.style.left=Math.random()*600+20+'px'; d.querySelector('button').onclick=()=>d.remove(); makeDraggable(d); }
+$('spawnPopup').onclick=()=>spawnPopup(); setInterval(()=>Math.random()>.75&&spawnPopup(),18000);
+
+function makeDraggable(el){ const h=el.querySelector('[data-drag="handle"]')||el; let ox=0,oy=0,drag=false; h.onmousedown=(e)=>{drag=true;ox=e.clientX-el.offsetLeft;oy=e.clientY-el.offsetTop;}; window.onmouseup=()=>drag=false; window.onmousemove=(e)=>{if(!drag)return; el.style.left=(e.clientX-ox)+'px'; el.style.top=(e.clientY-oy)+'px';}; }
+makeDraggable($('pdfWindow'));
+
+// PDF Archive + Reader
+const pdfs = load('pdfs', []);
+function addPdf(p){ pdfs.push(p); store('pdfs',pdfs); renderPdfList(); }
+function renderPdfList(){ $('pdfList').innerHTML = pdfs.map((p,i)=>`<li><button data-open='${i}'>${p.title}</button>${admin?`<button data-rm='${i}'>del</button>`:''}</li>`).join(''); document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openPdfData(pdfs[+b.dataset.open].data)); document.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{pdfs.splice(+b.dataset.rm,1);store('pdfs',pdfs);renderPdfList();}); }
+
+let pdfDoc=null,page=1,zoom=1; const canvas=$('pdfCanvas'),ctx=canvas.getContext('2d');
+import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.min.mjs').then(pdfjsLib=>{
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.worker.min.mjs';
+  async function render(){ if(!pdfDoc) return; const pg=await pdfDoc.getPage(page); const vp=pg.getViewport({scale:zoom}); canvas.width=vp.width; canvas.height=vp.height; await pg.render({canvasContext:ctx, viewport:vp}).promise; $('pdfMeta').textContent=`Page ${page} / ${pdfDoc.numPages}`; }
+  async function openPdfData(src){ $('pdfWindow').classList.remove('hidden'); pdfDoc = await pdfjsLib.getDocument(src).promise; page=1; zoom=1; render(); }
+  window.openPdfData=openPdfData;
+  $('openPdfBtn').onclick=()=>$('pdfWindow').classList.remove('hidden');
+  $('pdfClose').onclick=()=>$('pdfWindow').classList.add('hidden'); $('pdfMin').onclick=()=>$('pdfBody').classList.toggle('hidden');
+  $('pdfPrev').onclick=()=>{if(page>1){page--;render();}}; $('pdfNext').onclick=()=>{if(pdfDoc&&page<pdfDoc.numPages){page++;render();}};
+  $('pdfIn').onclick=()=>{zoom=Math.min(zoom+.2,3);render();}; $('pdfOut').onclick=()=>{zoom=Math.max(zoom-.2,.5);render();};
+  $('loadPdfUrl').onclick=()=>openPdfData($('pdfUrl').value.trim());
+  $('pdfFile').onchange=(e)=>{const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{addPdf({title:f.name,data:r.result}); openPdfData(r.result);}; r.readAsDataURL(f);};
+});
+
+renderGuests(); renderGallery(); renderPdfList(); paintSong();
