@@ -1,0 +1,1 @@
+export default function P(){return <section className='window'><h1>ADMIN UPLOAD CENTER</h1><p>Upload images/GIF/MP3/video and manage cosmic files.</p><form action='/api/upload' method='post' encType='multipart/form-data'><input name='file' type='file'/><button>UPLOAD</button></form></section>}

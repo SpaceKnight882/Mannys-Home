@@ -1,0 +1,24 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "sqlite" url = env("DATABASE_URL") }
+model MediaItem {
+  id        Int      @id @default(autoincrement())
+  title     String
+  kind      String
+  url       String
+  thumbUrl  String?
+  createdAt DateTime @default(now())
+}
+model Track {
+  id        Int      @id @default(autoincrement())
+  title     String
+  artist    String?
+  fileUrl   String
+  coverUrl  String?
+  createdAt DateTime @default(now())
+}
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  body      String
+  createdAt DateTime @default(now())
+}

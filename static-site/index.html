@@ -1,9 +1,107 @@
-<!DOCTYPE html><html lang='en'><head><title>Manny Cosmic Station</title><meta content='My personal website!' name='description'/><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'/><link href='favicon.ico' rel='icon' type='image/x-icon'/><link href='./style.css' rel='stylesheet'/><script>console.log("%cTemplate generated with petrapixel's layout generator: https://petrapixel.neocities.org/coding/layout-generator","font-size:14pt;color:#922a45;background:#ffd3ef");</script></head><body>
-<a href='#content' id='skip-to-content-link'>Skip to content</a>
-<div id='lock'><div class='box'><h2>Password Locked</h2><p>Enter code:</p><input id='pass' type='password'><button onclick='unlock()'>Unlock</button></div></div>
-<div class='layout'><header><div class='header-content'><div class='header-title'>Website Title</div></div></header>
-<aside class='left-sidebar'><div class='sidebar-section'><div class='sidebar-title'>Section Title</div><p>Space logs, pop culture, and underground radio.</p></div></aside>
-<aside class='right-sidebar'><nav><div class='sidebar-title'>Navigation</div><ul><li><a href='index.html'>Home</a></li><li><a href='content.html'>Content Page</a></li></ul></nav></aside>
-<main id='content'><section><h1>Home Station</h1><p>Dynamic music uploader + saved playlist (localStorage).</p><div class='player'><input id='titleInput' placeholder='Song title'><input id='urlInput' placeholder='Song URL'><button id='addUrl'>Add URL</button><input id='fileUpload' type='file' multiple accept='audio/*'><audio id='audio' controls></audio><ol id='songList' class='playlist'></ol></div></section></main>
-<footer><div>Footer Text. Template generated with <a href='https://petrapixel.neocities.org/coding/layout-generator.html'>petrapixel's layout generator</a>.</div></footer></div>
-<script src='./app.js'></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Manny's Space Station</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="bg-overlay"></div>
+  <div class="stars" id="stars"></div>
+
+  <header class="panel">
+    <h1>🚀 Manny's Space Station</h1>
+    <marquee>Welcome explorer • 2009 vibes online • Galaxy mode active • Build. Play. Share.</marquee>
+  </header>
+
+  <div class="layout">
+    <aside class="panel sidebar left">
+      <h2>Navigation</h2>
+      <a href="#home">Home</a>
+      <a href="#music">Music Player</a>
+      <a href="#about">About Me</a>
+      <a href="#gallery">Gallery</a>
+      <a href="#guestbook">Guestbook</a>
+      <a href="#links">Links</a>
+      <a href="#admin">Admin Panel</a>
+      <button id="openPdfBtn">📄 Open PDF Archive</button>
+    </aside>
+
+    <main class="panel main" id="home">
+      <section>
+        <h2>Home</h2>
+        <p>Fun retro-space personal site with draggable windows and pixel glow energy.</p>
+      </section>
+
+      <section id="music" class="window-block">
+        <h2>Music Player</h2>
+        <div class="music-controls">
+          <input id="songUrl" placeholder="Paste MP3 URL" />
+          <input id="songTitle" placeholder="Song title" />
+          <button id="addSong">Add Song</button>
+          <button id="prevSong">⏮</button>
+          <button id="playPause">▶/⏸</button>
+          <button id="nextSong">⏭</button>
+        </div>
+        <p id="nowPlaying">Now playing: Nothing yet</p>
+        <audio id="audio" controls></audio>
+        <div class="eq" aria-hidden="true"> <span></span><span></span><span></span><span></span><span></span></div>
+      </section>
+
+      <section id="about" class="window-block"><h2>About Me</h2><p>Indie web fan, music hoarder, space art collector.</p></section>
+      <section id="earth" class="window-block">
+        <h2>Earth Globe</h2>
+        <p>Interactive 3D Earth (drag to rotate).</p>
+        <div id="earthWrap"><canvas id="earthCanvas"></canvas></div>
+      </section>
+      <section id="gallery" class="window-block"><h2>Gallery</h2><div id="galleryGrid" class="gallery-grid"></div></section>
+      <section id="guestbook" class="window-block">
+        <h2>Guestbook</h2>
+        <p>Sign the live guestbook:</p>
+        <p><a href="https://premi.atabook.org/" target="_blank" rel="noreferrer">https://premi.atabook.org/</a></p>
+      </section>
+      <section id="links" class="window-block"><h2>Links</h2><ul><li><a href="https://neocities.org" target="_blank">Neocities</a></li><li><a href="https://archive.org" target="_blank">Internet Archive</a></li></ul></section>
+      <section id="admin" class="window-block">
+        <h2>Admin Panel</h2>
+        <input id="adminPass" type="password" placeholder="Admin password" />
+        <button id="unlockAdmin">Unlock</button>
+        <div id="adminTools" class="hidden">
+          <p>Upload image/GIF/MP3/PDF</p>
+          <input id="fileUpload" type="file" accept="image/*,audio/*,.pdf" />
+          <button id="saveFile">Save</button>
+        </div>
+      </section>
+    </main>
+
+    <aside class="panel sidebar right">
+      <h2>Tools</h2>
+      <button id="spawnPopup">Show Popup</button>
+      <div id="pdfListWrap">
+        <h3>PDF Archive</h3>
+        <ul id="pdfList"></ul>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="panel">© Manny's Space Station • Retro internet forever</footer>
+
+  <div id="pdfWindow" class="window hidden" role="dialog" aria-label="PDF Reader">
+    <div class="window-title" data-drag="handle">📄 PDF Reader <div><button id="pdfMin">_</button><button id="pdfClose">X</button></div></div>
+    <div class="window-body" id="pdfBody">
+      <div class="pdf-toolbar">
+        <input id="pdfUrl" placeholder="Load PDF URL" />
+        <button id="loadPdfUrl">Load URL</button>
+        <input id="pdfFile" type="file" accept="application/pdf" />
+        <button id="pdfPrev">Prev</button><button id="pdfNext">Next</button>
+        <button id="pdfOut">-</button><button id="pdfIn">+</button>
+        <span id="pdfMeta">Page 0 / 0</span>
+      </div>
+      <canvas id="pdfCanvas"></canvas>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.min.mjs" type="module"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
