@@ -9,6 +9,7 @@ Next.js + TypeScript retro-space website rebuilt in chaotic 2009 style.
 4. `npm run dev`
 
 ## Features
+- Password gate (`Ecm`)
 - Password gate (`ecm-was here .`)
 - Animated galaxy GIF background + CRT scanlines
 - Left/right sidebar + center layout

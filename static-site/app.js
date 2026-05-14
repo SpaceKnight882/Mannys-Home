@@ -10,6 +10,7 @@ $('prevSong').onclick=()=>{ if(!songs.length) return; songIndex=(songIndex-1+son
 $('nextSong').onclick=()=>{ if(!songs.length) return; songIndex=(songIndex+1)%songs.length; audio.src=songs[songIndex].url; audio.play(); paintSong();};
 $('playPause').onclick=()=> audio.paused?audio.play():audio.pause();
 
+let admin = false; $('unlockAdmin').onclick=()=>{admin=$('adminPass').value==='Ecm'; if(admin){$('adminTools').classList.remove('hidden'); spawnPopup('Admin mode unlocked');} };
 const guests = load('guestbook', []);
 function renderGuests(){ $('guestList').innerHTML = guests.map(g=>`<li><b>${g.n}</b>: ${g.m}</li>`).join(''); }
 $('guestAdd').onclick=()=>{ const n=$('guestName').value.trim(),m=$('guestMsg').value.trim(); if(!n||!m)return; guests.push({n,m}); store('guestbook',guests); renderGuests();};
@@ -45,4 +46,27 @@ import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.min.mjs').then
   $('pdfFile').onchange=(e)=>{const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{addPdf({title:f.name,data:r.result}); openPdfData(r.result);}; r.readAsDataURL(f);};
 });
 
+renderGallery(); renderPdfList(); paintSong();
+
+
+// 3D Earth Globe (Three.js)
+import('https://unpkg.com/three@0.165.0/build/three.module.js').then(async THREE=>{
+  const {OrbitControls}=await import('https://unpkg.com/three@0.165.0/examples/jsm/controls/OrbitControls.js');
+  const canvas=$('earthCanvas'); if(!canvas) return;
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(45,canvas.clientWidth/canvas.clientHeight,0.1,1000); camera.position.set(0,0,3);
+  const controls=new OrbitControls(camera,renderer.domElement); controls.enablePan=false; controls.minDistance=2; controls.maxDistance=6;
+  const light=new THREE.DirectionalLight(0xffffff,1.2); light.position.set(5,2,5); scene.add(light); scene.add(new THREE.AmbientLight(0x446688,0.7));
+  const loader=new THREE.TextureLoader();
+  const earthMap=loader.load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
+  const bump=loader.load('https://threejs.org/examples/textures/planets/earth_bump_2048.jpg');
+  const spec=loader.load('https://threejs.org/examples/textures/planets/earth_specular_2048.jpg');
+  const earth=new THREE.Mesh(new THREE.SphereGeometry(1,64,64),new THREE.MeshPhongMaterial({map:earthMap,bumpMap:bump,bumpScale:0.03,specularMap:spec,specular:new THREE.Color('grey')}));
+  const clouds=new THREE.Mesh(new THREE.SphereGeometry(1.01,64,64),new THREE.MeshPhongMaterial({map:loader.load('https://threejs.org/examples/textures/planets/earth_clouds_1024.png'),transparent:true,opacity:0.35}));
+  scene.add(earth); scene.add(clouds);
+  function size(){ const w=canvas.clientWidth,h=canvas.clientHeight; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); }
+  size(); window.addEventListener('resize',size);
+  (function animate(){ requestAnimationFrame(animate); earth.rotation.y+=0.0015; clouds.rotation.y+=0.002; controls.update(); renderer.render(scene,camera); })();
+});
 renderGuests(); renderGallery(); renderPdfList(); paintSong();
