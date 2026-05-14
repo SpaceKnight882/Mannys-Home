@@ -1,0 +1,1 @@
+export default function AboutPage() { return <main className="border bg-black/50 p-4"><h1 className="font-pixel text-sm">About the Astronaut</h1><p className="mt-2 text-sm">Indie web drifter collecting nebula gifs, lo-fi spacewave and telescope noise since 2008.</p></main>; }

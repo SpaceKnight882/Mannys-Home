@@ -1,0 +1,3 @@
+'use client';
+import { useState } from 'react';
+export default function GuestbookPage() { const [entries, setEntries] = useState<string[]>(['LunaKid42: stellar site!!!']); const [value, setValue] = useState(''); return <main className="border bg-black/50 p-4"><h1 className="font-pixel text-sm">Cosmic Guestbook</h1><div className="mt-2 space-y-2 text-xs">{entries.map((e) => <p key={e}>{e}</p>)}</div><input className="mt-3 w-full border bg-black p-2 text-xs" value={value} onChange={(e)=>setValue(e.target.value)} placeholder="leave a message"/><button className="mt-2 border px-2 py-1 text-xs" onClick={()=>{ if(value){setEntries([`You: ${value}`,...entries]);setValue('');}}}>Transmit</button></main>; }
