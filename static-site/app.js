@@ -11,6 +11,11 @@ $('nextSong').onclick=()=>{ if(!songs.length) return; songIndex=(songIndex+1)%so
 $('playPause').onclick=()=> audio.paused?audio.play():audio.pause();
 
 let admin = false; $('unlockAdmin').onclick=()=>{admin=$('adminPass').value==='Ecm'; if(admin){$('adminTools').classList.remove('hidden'); spawnPopup('Admin mode unlocked');} };
+const guests = load('guestbook', []);
+function renderGuests(){ $('guestList').innerHTML = guests.map(g=>`<li><b>${g.n}</b>: ${g.m}</li>`).join(''); }
+$('guestAdd').onclick=()=>{ const n=$('guestName').value.trim(),m=$('guestMsg').value.trim(); if(!n||!m)return; guests.push({n,m}); store('guestbook',guests); renderGuests();};
+
+let admin = false; $('unlockAdmin').onclick=()=>{admin=$('adminPass').value==='ecm-was here .'; if(admin){$('adminTools').classList.remove('hidden'); spawnPopup('Admin mode unlocked');} };
 const media = load('galleryMedia', []);
 function renderGallery(){ $('galleryGrid').innerHTML = media.map((m,i)=>`<div class='card'><p>${m.name}</p>${m.type.startsWith('image/')?`<img src='${m.data}'/>`:m.type==='application/pdf'?'<p>PDF saved in archive</p>':`<audio controls src='${m.data}'></audio>`}${admin?`<button data-del='${i}'>Delete</button>`:''}</div>`).join(''); [...document.querySelectorAll('[data-del]')].forEach(b=>b.onclick=()=>{media.splice(+b.dataset.del,1);store('galleryMedia',media);renderGallery();}); }
 $('saveFile').onclick=()=>{ const f=$('fileUpload').files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{const item={name:f.name,type:f.type||'application/octet-stream',data:r.result}; media.push(item); store('galleryMedia',media); if(f.type==='application/pdf') addPdf({title:f.name,data:r.result}); renderGallery();}; r.readAsDataURL(f); };
@@ -64,3 +69,4 @@ import('https://unpkg.com/three@0.165.0/build/three.module.js').then(async THREE
   size(); window.addEventListener('resize',size);
   (function animate(){ requestAnimationFrame(animate); earth.rotation.y+=0.0015; clouds.rotation.y+=0.002; controls.update(); renderer.render(scene,camera); })();
 });
+renderGuests(); renderGallery(); renderPdfList(); paintSong();
