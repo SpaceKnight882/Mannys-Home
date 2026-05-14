@@ -1,30 +1,18 @@
 'use client';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-
-const equations = ['E=mc²', 'iħ∂ψ/∂t=Ĥψ', 'N=R*×fp×ne×fl×fi×fc×L', 'F=G(m1m2/r²)', 'Δv = Isp g0 ln(m0/mf)'];
-
-export function SiteShell({ children }: { children: React.ReactNode }) {
-  const [popup, setPopup] = useState<string | null>(null);
-  useEffect(() => {
-    const id = setInterval(() => setPopup(Math.random() > 0.5 ? 'SIGNAL DETECTED' : 'ALIEN TRANSMISSION FOUND'), 12000);
-    return () => clearInterval(id);
-  }, []);
-
-  return (
-    <div className="min-h-screen p-4">
-      <header className="mb-4 border border-cyan-300/40 bg-black/40 p-3">
-        <p className="marquee font-pixel text-xs text-fuchsia-300">WELCOME TO MANNY&apos;S INTERSTELLAR TERMINAL // VISITOR #1000000 // UNDER COSMIC CONSTRUCTION</p>
-        <nav className="mt-2 flex flex-wrap gap-3 text-sm">
-          {['/','/music','/about','/guestbook','/links','/black-hole'].map((p) => <Link key={p} href={p} className="rounded border border-cyan-400/40 px-2 py-1 hover:bg-cyan-500/20">{p === '/' ? 'Home Station' : p.slice(1)}</Link>)}
-        </nav>
-      </header>
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        {equations.map((eq, i) => <motion.div key={eq} className="absolute text-xs text-cyan-200/40" initial={{ x: i * 120, y: i * 80 }} animate={{ y: [null, i * 80 + 60, i * 80], opacity: [0.2, 0.7, 0.2] }} transition={{ duration: 14 + i, repeat: Infinity }}>{eq}</motion.div>)}
-      </div>
-      {popup && <div className="fixed bottom-4 right-4 max-w-xs border border-fuchsia-400 bg-black p-3 text-xs text-fuchsia-200"><p className="font-pixel blink">{popup}</p><button onClick={() => setPopup(null)} className="mt-2 border px-2">close</button></div>}
-      {children}
-    </div>
-  );
-}
+import { motion } from 'framer-motion';
+import PasswordGate from './PasswordGate';
+const nav=[['/','Home Station'],['/music','Music Archive'],['/astronaut-log','Astronaut Log'],['/gallery','Cosmic Gallery'],['/transmission-board','Transmission Board'],['/secret-black-hole','Secret Black Hole'],['/admin','Admin Upload Center'],['/links','Space Links Directory'],['/downloads','Retro Downloads']];
+const popups=['SIGNAL DETECTED','ALIEN TRANSMISSION FOUND','YOU ARE THE 1,000,000TH SPACE TRAVELER','FREE GALACTIC MP3 DOWNLOAD','WARNING: COSMIC VIRUS DETECTED'];
+export function SiteShell({children}:{children:React.ReactNode}){const [ok,setOk]=useState(false);const [p,setP]=useState<string[]>([]);
+useEffect(()=>setOk(localStorage.getItem('cosmic_access')==='1'),[]);
+useEffect(()=>{const t=setInterval(()=>setP(s=>[...s,popups[Math.floor(Math.random()*popups.length)]]),9000);return()=>clearInterval(t);},[]);
+if(!ok)return <PasswordGate onUnlock={()=>setOk(true)} />;
+return <div className='site-wrap'>
+<div className='crt'/><div className='equations'>{['E=mc²','iħ∂ψ/∂t=Ĥψ','010101 SPACE','λx. alien(x)','F=Gm1m2/r²'].map((e,i)=><motion.span key={e+i} animate={{x:[0,40,-20,0],y:[0,-50,30,0],opacity:[.2,.9,.2]}} transition={{duration:20+i,repeat:Infinity}}>{e}</motion.span>)}</div>
+<header><div className="blink">WELCOME TO THE ABANDONED COSMIC PORTAL :: INTERSTELLAR CONNECTION UNSTABLE :: BEST VIEWED ON WINDOWS XP</div></header>
+<div className='layout'><aside className='left'>{nav.map(([u,t])=><Link key={u} href={u}>{t}</Link>)}<div className='widget blink'>VISITOR #0001337</div></aside><main>{children}</main><aside className='right'><div className='widget'>CHATROOM OFFLINE</div><div className='widget'>UFO RADAR ACTIVE</div></aside></div>
+<footer>© 2009-2099 Manny's Home • Under Galactic Construction</footer>
+{p.map((x,i)=><div key={i} className='popup' style={{top:`${20+i*40}px`,left:`${40+i*55}px`}}><b>{x}</b><button onClick={()=>setP(s=>s.filter((_,idx)=>idx!==i))}>x</button></div>)}
+</div>}
