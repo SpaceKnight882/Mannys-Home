@@ -1,0 +1,1 @@
+export default function BlackHolePage(){return <main className="border border-pink-500 bg-black/70 p-4"><h1 className="font-pixel text-sm text-pink-300">Hidden Black Hole Page</h1><p className="mt-2 text-xs">You found the secret chamber. Coordinates: XJ-2009-VOID. Transmission unlocked.</p></main>}
