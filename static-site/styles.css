@@ -1,0 +1,12 @@
+body{margin:0;background:radial-gradient(circle at top,#2f1168,#10031f 45%,#03010a);color:#d2f9ff;font-family:Courier New,monospace;overflow-x:hidden;min-height:100vh}
+body.light{background:radial-gradient(circle at top,#d6ebff,#b7c7ff 45%,#8698d6);color:#120822}
+.scan::before{content:'';position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(transparent 0 2px,rgba(255,255,255,.05) 2px 4px)}
+#stars{position:fixed;inset:0;z-index:-1}.star{position:absolute;width:2px;height:2px;background:#fff;animation:twinkle 2s infinite alternate}@keyframes twinkle{to{opacity:.2;transform:scale(1.8)}}
+nav a{color:#67f0ff;border:1px solid #67f0ff66;padding:6px 10px;text-decoration:none;margin:4px;display:inline-block}
+.window{background:#0008;border:1px solid #8b5cf6;padding:14px;margin:12px}.blink{animation:b 1s step-end infinite}@keyframes b{50%{opacity:0}}
+.marquee{white-space:nowrap;overflow:hidden}.marquee span{display:inline-block;animation:m 14s linear infinite}@keyframes m{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
+.eq{position:fixed;color:#67f0ff66;font-size:12px;pointer-events:none;animation:float 16s ease-in-out infinite}@keyframes float{50%{transform:translateY(50px);opacity:.9}}
+.reduce .eq,.reduce .marquee span,.reduce .star{animation:none!important}
+.popup{position:fixed;right:16px;bottom:16px;background:#000;border:1px solid #f0f;padding:10px;display:none;z-index:10}
+.ad{position:fixed;z-index:11;max-width:220px}.settings{margin-top:8px}.eqbars{display:flex;align-items:end;gap:2px;height:36px}.eqbars i{display:block;width:4px;background:#67f0ff;animation:eq 1s infinite alternate}.eqbars i:nth-child(odd){animation-duration:1.5s}@keyframes eq{from{height:8px}to{height:34px}}
+#orbiter{position:fixed;pointer-events:none}

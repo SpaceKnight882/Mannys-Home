@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #2f1168 0%, #10031f 40%, #03010a 100%);
+  color: #d2f9ff;
+  font-family: 'Courier New', monospace;
+  overflow-x: hidden;
+}
+.scanline::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(transparent 0 2px, rgba(255,255,255,0.05) 2px 4px);
+  mix-blend-mode: screen;
+}
+.marquee { animation: marquee 16s linear infinite; white-space: nowrap; }
+@keyframes marquee { from { transform: translateX(100%);} to { transform: translateX(-100%);} }
+.blink { animation: blink 1s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
